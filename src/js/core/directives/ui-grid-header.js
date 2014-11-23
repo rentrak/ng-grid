@@ -3,6 +3,7 @@
 
   angular.module('ui.grid').directive('uiGridHeader', ['$templateCache', '$compile', 'uiGridConstants', 'gridUtil', '$timeout', function($templateCache, $compile, uiGridConstants, gridUtil, $timeout) {
     var defaultTemplate = 'ui-grid/ui-grid-header';
+    var sectionHeaderTemplate = 'ui-grid/ui-grid-section-header';
     var emptyTemplate = 'ui-grid/ui-grid-no-header';
 
     return {
@@ -36,8 +37,12 @@
             var headerTemplate;
             if ($scope.grid.options.hideHeader){
               headerTemplate = emptyTemplate;
+            } else if ($scope.grid.options.headerTemplate){
+              headerTemplate = $scope.grid.options.headerTemplate;
+            } else if ($scope.grid.options.sectionHeaders) {
+              headerTemplate = sectionHeaderTemplate;
             } else {
-              headerTemplate = ($scope.grid.options.headerTemplate) ? $scope.grid.options.headerTemplate : defaultTemplate;            
+              headerTemplate = defaultTemplate;
             }
 
              gridUtil.getTemplate(headerTemplate)
