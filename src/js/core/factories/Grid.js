@@ -1327,6 +1327,34 @@ angular.module('ui.grid')
     return min;
   };
 
+  Grid.prototype.getSectionWidth = function getSectionWidth(section) {
+    var self = this;
+    if (section.subSections) {
+      return section.subSections
+        .map(function(subSection) {
+          // recurse for subsections
+          return self.getSectionWidth(subSection);
+        })
+        .reduceRight(function(a, b) {
+          // use reduce to get sum of all subsections
+          return a + b;
+        });
+    } else if (section.columns) {
+      return section.columns
+        .map(function(columnName) {
+          // get drawn width of column from its definition object
+          return self.getColumn(columnName).drawnWidth;
+        })
+        .reduceRight(function(a, b) {
+          // use reduce to get sum of all column widths
+          return a + b;
+        });
+    } else {
+      // a section with no subsections or columns is unexpected
+      return 0;
+    }
+  };
+
   Grid.prototype.getBodyHeight = function getBodyHeight() {
     // Start with the viewportHeight
     var bodyHeight = this.getViewportHeight();
