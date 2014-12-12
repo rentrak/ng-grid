@@ -296,6 +296,144 @@ describe('ui-grid', function() {
 
   });
 
+  describe('section visibility check', function() {
+    var element = null, gridApi = null;
+
+    var columnDefs = [
+      { name: 'col1' },
+      { name: 'col2' },
+      { name: 'col3' },
+      { name: 'col4' }
+    ];
+
+    var sec1 = { displayName: 'sec1', columns: [ 'col1', 'col2' ] };
+    var sec2 = { displayName: 'sec2', columns: [ 'col3', 'col4' ] };
+
+    beforeEach(inject(function ($compile, $rootScope, $document) {
+      var scope = $rootScope;
+
+      element = angular.element('<div style="width: 333px; height: 150px" ui-grid="gridOptions"></div>');
+      scope.gridOptions = {
+        columnDefs: columnDefs,
+        data: [],
+        onRegisterApi: function( api ){ gridApi = api; },
+        sectionHeaders: [ sec1, sec2 ]
+      };
+
+      $compile(element)(scope);
+      $document[0].body.appendChild(element[0]);
+
+      scope.$digest();
+    }));
+
+    afterEach(function() {
+      element.remove();
+    });
+
+    it('should return true when all columns are visible', function() {
+      expect(gridApi.grid.isSectionVisible(sec1)).toBeTruthy();
+      expect(gridApi.grid.isSectionVisible(sec2)).toBeTruthy();
+    });
+
+    it('should return true when any column within section is visible', function() {
+      gridApi.grid.columns[0].visible = false;
+
+      expect(gridApi.grid.isSectionVisible(sec1)).toBeTruthy();
+    });
+
+    it('should return false when all columns within section are hidden', function() {
+      gridApi.grid.columns[0].visible = false;
+      gridApi.grid.columns[1].visible = false;
+
+      expect(gridApi.grid.isSectionVisible(sec1)).toBeFalsy();
+      expect(gridApi.grid.isSectionVisible(sec2)).toBeTruthy();
+    });
+
+  });
+
+  describe('two layer section visibility check', function() {
+    var element = null, gridApi = null;
+
+    var columnDefs = [
+      {name: 'col1'},
+      {name: 'col2'},
+      {name: 'col3'},
+      {name: 'col4'},
+      {name: 'col5'},
+      {name: 'col6'},
+      {name: 'col7'},
+      {name: 'col8'}
+    ];
+
+    var subsec1 = {displayName: 'subsec1', columns: ['col1', 'col2']};
+    var subsec2 = {displayName: 'subsec2', columns: ['col3', 'col4']};
+    var subsec3 = {displayName: 'subsec3', columns: ['col5', 'col6']};
+    var subsec4 = {displayName: 'subsec4', columns: ['col7', 'col8']};
+
+    var sec1 = {displayName: 'sec1', subSections: [subsec1, subsec2]};
+    var sec2 = {displayName: 'sec2', subSections: [subsec3, subsec4]};
+
+    beforeEach(inject(function ($compile, $rootScope, $document) {
+      var scope = $rootScope;
+
+      element = angular.element('<div style="width: 333px; height: 150px" ui-grid="gridOptions"></div>');
+      scope.gridOptions = {
+        columnDefs: columnDefs,
+        data: [],
+        onRegisterApi: function (api) {
+          gridApi = api;
+        },
+        sectionHeaders: [sec1, sec2]
+      };
+
+      $compile(element)(scope);
+      $document[0].body.appendChild(element[0]);
+
+      scope.$digest();
+    }));
+
+    afterEach(function () {
+      element.remove();
+    });
+
+    it('should return true when all columns are visible', function() {
+      expect(gridApi.grid.isSectionVisible(subsec1)).toBeTruthy();
+      expect(gridApi.grid.isSectionVisible(subsec2)).toBeTruthy();
+      expect(gridApi.grid.isSectionVisible(subsec3)).toBeTruthy();
+      expect(gridApi.grid.isSectionVisible(subsec4)).toBeTruthy();
+      expect(gridApi.grid.isSectionVisible(sec1)).toBeTruthy();
+      expect(gridApi.grid.isSectionVisible(sec2)).toBeTruthy();
+    });
+
+    it('should return true when any column within section is visible', function() {
+      gridApi.grid.columns[0].visible = false;
+
+      expect(gridApi.grid.isSectionVisible(subsec1)).toBeTruthy();
+    });
+
+    it('should return false when all columns within section are hidden', function() {
+      gridApi.grid.columns[0].visible = false;
+      gridApi.grid.columns[1].visible = false;
+
+      expect(gridApi.grid.isSectionVisible(subsec1)).toBeFalsy();
+    });
+
+    it('should return false when all subsections within section are hidden', function () {
+      gridApi.grid.columns[0].visible = false;
+      gridApi.grid.columns[1].visible = false;
+
+      expect(gridApi.grid.isSectionVisible(subsec1)).toBeFalsy();
+
+      gridApi.grid.columns[2].visible = false;
+      gridApi.grid.columns[3].visible = false;
+
+      expect(gridApi.grid.isSectionVisible(subsec2)).toBeFalsy();
+
+      expect(gridApi.grid.isSectionVisible(sec1)).toBeFalsy();
+    });
+
+  });
+
   describe('watch for new pinned containers', function () {
     var element, scope;
 
