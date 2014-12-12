@@ -1508,8 +1508,14 @@ angular.module('ui.grid')
     } else if (section.columns) {
       return section.columns
         .map(function(columnName) {
+
           // get drawn width of column from its definition object
-          return self.getColumn(columnName).drawnWidth;
+          var c = self.getColumn(columnName), colWidth = 0;
+          if (c && c.visible) {
+            colWidth = c.drawnWidth;
+          }
+
+          return colWidth;
         })
         .reduceRight(function(a, b) {
           // use reduce to get sum of all column widths

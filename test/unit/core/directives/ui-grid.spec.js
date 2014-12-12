@@ -250,6 +250,52 @@ describe('ui-grid', function() {
 
   });
 
+  describe('section width calculation with invisible column', function() {
+    var element = null, gridApi = null;
+
+    var columnDefs = [
+      { name: 'col1' },
+      { name: 'col2' }
+    ];
+
+    var sec1 = { displayName: 'sec1', columns: [ 'col1', 'col2' ] };
+
+    beforeEach(inject(function ($compile, $rootScope, $document) {
+      var scope = $rootScope;
+
+      element = angular.element('<div style="width: 333px; height: 150px" ui-grid="gridOptions"></div>');
+      scope.gridOptions = {
+        columnDefs: columnDefs,
+        data: [],
+        onRegisterApi: function( api ){ gridApi = api; },
+        sectionHeaders: [ sec1 ]
+      };
+
+      $compile(element)(scope);
+      $document[0].body.appendChild(element[0]);
+
+      scope.$digest();
+    }));
+
+    afterEach(function() {
+      element.remove();
+      angular.forEach(columnDefs, function (c) {
+        delete c.width;
+      });
+    });
+
+    it('should only sum widths of visible columns for section widths', function() {
+
+      // hide the first column
+      gridApi.grid.columns[0].visible = false;
+
+      expect(gridApi.grid.getSectionWidth(sec1))
+          .toEqual(gridApi.grid.columns[1].drawnWidth);
+
+    });
+
+  });
+
   describe('watch for new pinned containers', function () {
     var element, scope;
 
